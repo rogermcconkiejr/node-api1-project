@@ -16,7 +16,7 @@ server.get('/users', (req, res)=>{
     usersModel
     .find()
     .then(users => {
-        res.send(users);
+        res.json(users);
     })
     .catch(error => {
         res.status(500).json({ errorMessage: "The users information could not be retrieved."});
@@ -26,19 +26,17 @@ server.get('/users', (req, res)=>{
 server.get('/users/:id', (req, res)=>{
 const id = req.params.id;
 
-if (!id) {
-    res.status(404).json({ errorMessage: "User with the specified id does not exist." });
-} else {
-
     usersModel
     .findById(id)
     .then(users => {
-        res.send(users);
+        if (!users) {
+            res.status(404).json({ message: "The user with the specified ID does not exist." });
+        }
+        else{res.json(users)}
     })
     .catch(error => {
-        res.status(500).json({ errorMessage: "The users information could not be retrieved."});
+        res.status(500).json({ errorMessage: "The users information could not be retrieved." });
     });
-}
 });
 
 server.post('/users', (req, res)=>{ // this woudn't work without server.use(express.json()) above.
@@ -64,13 +62,17 @@ server.post('/users', (req, res)=>{ // this woudn't work without server.use(expr
 server.delete('/users/:id', (req, res)=>{
 const id = req.params.id;
 
+
 usersModel
 .remove(id)
-.then(user =>{
-    res.json(user);
+.then(users => {
+    if (!users) {
+        res.status(404).json({ message: "The user with the specified ID does not exist." });
+    }
+    else{res.status(200).json(users)}
 })
 .catch(error => {
-    res.json({ message: 'error saving the user' });
+    res.status(500).json({ message: 'The user could not be removed.' });
 })
 })
 
@@ -80,11 +82,14 @@ server.put('/users/:id', (req, res)=>{
 
     usersModel
     .update(id, changes)
-    .then(user =>{
-        res.json(user);
+    .then(users => {
+        if (!users) {
+            res.status(404).json({ message: "The user with the specified ID does not exist." });
+        }
+        else{res.status(200).json(users)}
     })
     .catch(error => {
-        res.json({ message: 'error saving the user' });
+        res.json({ message: 'The user information could not be modified.' });
     })
 })
 
